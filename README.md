@@ -1,4 +1,4 @@
-# GST Guard 🛡️
+# GST Guard DEMO VERSION
 
 WhatsApp-first GST ITC Recovery Assistant for Indian MSMEs.
 
