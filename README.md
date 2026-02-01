@@ -4,22 +4,26 @@ WhatsApp-first GST ITC Recovery Assistant for Indian MSMEs.
 
 **Track vendor invoices, reconcile with GSTR-2B, and send automated reminders via WhatsApp.**
 
----
-
-## ✨ Features
-
-- 📸 **Image & PDF Processing** - Send invoices as photos or PDFs
-- 🤖 **AI Extraction** - Auto-extracts GSTIN, invoice number, amount, and date
-- 🔍 **GST Reconciliation** - Simulates GSTR-2B matching to identify ITC at risk
-- 📊 **Dashboard** - Mobile-first UI with stats, search, filters, and CSV export
-- 💬 **WhatsApp Reminders** - Send bilingual nudges to vendors who haven't filed
-- 🌐 **Language Support** - Users can switch between Hindi and English
-- 📋 **Certificate Onboarding** - Auto-extract GSTIN from GST certificate photos
-- 🔐 **Secure** - OTP authentication, JWT sessions, Row-Level Security
+> **⚠️ BETA / DEMO VERSION**  
+> This application currently uses **simulated GST portal reconciliation** for demonstration purposes.  
+> It does NOT connect to the real GST portal API. For production use, integration with a licensed GSP (GST Suvidha Provider) is required.
 
 ---
 
-## 🚀 Quick Start
+##  Features
+
+-  **Image & PDF Processing** - Send invoices as photos or PDFs
+-  **AI Extraction** - Auto-extracts GSTIN, invoice number, amount, and date
+-  **GST Reconciliation** - Simulates GSTR-2B matching to identify ITC at risk
+-  **Dashboard** - Mobile-first UI with stats, search, filters, and CSV export
+-  **WhatsApp Reminders** - Send bilingual nudges to vendors who haven't filed
+-  **Language Support** - Users can switch between Hindi and English
+-  **Certificate Onboarding** - Auto-extract GSTIN from GST certificate photos
+-  **Secure** - OTP authentication, JWT sessions, Row-Level Security
+
+---
+
+##  Quick Start
 
 ### Prerequisites
 - Python 3.10+ (3.11 recommended)
@@ -62,7 +66,7 @@ Configure WhatsApp webhook URL: `https://your-ngrok-url.ngrok-free.app/api/webho
 
 ---
 
-## 🔧 Environment Variables (.env)
+##  Environment Variables (.env)
 
 ```env
 # Database (Required)
@@ -115,7 +119,7 @@ gst-guard/
 
 ---
 
-## 🌐 Key URLs
+##  Key URLs
 
 | URL | Purpose |
 |-----|---------|
@@ -125,7 +129,7 @@ gst-guard/
 
 ---
 
-## 🔄 How It Works
+##  How It Works
 
 1. **New User Signup**
    - Scan QR code → Opens WhatsApp
@@ -135,8 +139,8 @@ gst-guard/
 2. **Invoice Processing**
    - Forward invoice (image or PDF) to WhatsApp bot
    - AI extracts: GSTIN, invoice number, amount, date
-   - GST reconciliation simulates GSTR-2B matching
-   - Invoice saved with status: FILED / NOT_FOUND / MISMATCH
+   - **Mock GST reconciliation** simulates GSTR-2B matching (70% FILED, 20% NOT_FOUND, 10% MISMATCH)
+   - Invoice saved with simulated status: FILED / NOT_FOUND / MISMATCH
 
 3. **Dashboard**
    - Login with phone number (OTP via WhatsApp)
@@ -202,7 +206,7 @@ Run `supabase_rls.sql` to enable Row-Level Security and create access policies.
 
 ---
 
-## 🔒 Security
+##  Security
 
 - ✅ OTP-based authentication via WhatsApp
 - ✅ JWT token sessions
@@ -210,24 +214,6 @@ Run `supabase_rls.sql` to enable Row-Level Security and create access policies.
 - ✅ Webhook signature verification
 - ✅ Environment variables for secrets
 - ✅ `.gitignore` configured to exclude `.env`
-
----
-
-## 📝 License
-
-MIT License - See LICENSE file for details
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please open an issue or PR.
-
----
-
-## 📧 Support
-
-For issues or questions, please open a GitHub issue or contact the maintainer.
 
 ---
 
