@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GST Guard - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-dark {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.4);
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* Mobile bottom nav */
+        .mobile-nav {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(10px);
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 8px 0;
+                padding-bottom: env(safe-area-inset-bottom, 8px);
+                z-index: 100;
+            }
+
+            body {
+                padding-bottom: 80px;
+            }
+        }
+
+        .filter-btn {
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+        }
+    </style>
+</head>
+
+<body class="p-4 md:p-6">
+    <!-- Login Screen -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center">
+        <div class="glass-dark rounded-3xl p-8 md:p-12 w-full max-w-md shadow-2xl fade-in">
+            <div class="text-center mb-8">
+                <div class="text-5xl mb-4">🛡️</div>
+                <h1 class="text-3xl font-bold text-white mb-2">GST Guard</h1>
+                <p class="text-gray-400" data-i18n="login_subtitle">Your ITC Recovery Assistant</p>
+            </div>
+
+            <!-- Step 1: Phone Number -->
+            <div id="step-phone">
+                <label class="block text-gray-300 text-sm mb-2" data-i18n="phone_label">WhatsApp Phone Number</label>
+                <div class="flex gap-2 mb-4">
+                    <span class="input-field text-white px-4 py-3 rounded-xl text-center">+91</span>
+                    <input type="tel" id="phone-input" placeholder="9876543210" maxlength="10"
+                        class="input-field flex-1 text-white px-4 py-3 rounded-xl focus:outline-none text-lg tracking-wider">
+                </div>
+                <button onclick="requestOTP()" id="request-otp-btn"
+                    class="btn-primary w-full text-white font-semibold py-4 rounded-xl text-lg">
+                    <span data-i18n="send_otp">Send OTP</span> →
+                </button>
+                <p class="text-gray-500 text-sm text-center mt-4" data-i18n="otp_help">
+                    You'll receive a login code on WhatsApp
+                </p>
+            </div>
+
+            <!-- Step 2: OTP Verification -->
+            <div id="step-otp" class="hidden">
+                <div class="text-center mb-6">
+                    <p class="text-gray-300" data-i18n="enter_otp">Enter the 6-digit code sent to</p>
+                    <p class="text-white font-semibold" id="display-phone">+91 9876543210</p>
+                </div>
+                <input type="text" id="otp-input" placeholder="• • • • • •" maxlength="6"
+                    class="input-field w-full text-white px-4 py-4 rounded-xl focus:outline-none text-2xl tracking-[0.5em] text-center mb-4">
+                <button onclick="verifyOTP()" id="verify-otp-btn"
+                    class="btn-primary w-full text-white font-semibold py-4 rounded-xl text-lg mb-4">
+                    <span data-i18n="verify_login">Verify & Login</span>
+                </button>
+                <button onclick="backToPhone()" class="w-full text-gray-400 py-2 hover:text-white transition">
+                    ← <span data-i18n="change_number">Change Number</span>
+                </button>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-msg" class="hidden bg-red-500/20 text-red-300 p-4 rounded-xl mt-4 text-center"></div>
+        </div>
+    </div>
+
+    <!-- Dashboard Screen -->
+    <div id="dashboard-screen" class="hidden max-w-6xl mx-auto fade-in">
+        <!-- Header -->
+        <header class="mb-6 flex justify-between items-center flex-wrap gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-white">GST Guard 🛡️</h1>
+                <p class="text-gray-400 text-sm md:text-base" id="user-greeting" data-i18n="welcome">Welcome back!</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Language Toggle -->
+                <button onclick="toggleLanguage()" id="lang-toggle"
+                    class="text-sm bg-white/10 hover:bg-white/20 text-white px-3 py-2 rounded-lg transition">
+                    हिंदी
+                </button>
+                <div class="text-right hidden md:block">
+                    <p class="text-xs text-gray-400" data-i18n="status">Status</p>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full pulse-dot"></span>
+                        <span class="text-green-400 font-medium text-sm">Live</span>
+                    </div>
+                </div>
+                <button onclick="logout()"
+                    class="text-gray-400 hover:text-white transition px-3 py-2 rounded-lg hover:bg-white/10 text-sm">
+                    <span data-i18n="logout">Logout</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <div class="stat-card rounded-2xl p-4 md:p-5">
+                <p class="text-gray-400 text-xs md:text-sm mb-1" data-i18n="total_processed">Total Processed</p>
+                <p class="text-xl md:text-2xl font-bold text-white">₹<span id="stat-total">0</span></p>
+            </div>
+            <div class="stat-card rounded-2xl p-4 md:p-5">
+                <p class="text-gray-400 text-xs md:text-sm mb-1" data-i18n="itc_recovered">ITC Recovered</p>
+                <p class="text-xl md:text-2xl font-bold text-green-400">₹<span id="stat-recovered">0</span></p>
+            </div>
+            <div class="stat-card rounded-2xl p-4 md:p-5">
+                <p class="text-gray-400 text-xs md:text-sm mb-1" data-i18n="at_risk">At Risk</p>
+                <p class="text-xl md:text-2xl font-bold text-red-400">₹<span id="stat-risk">0</span></p>
+            </div>
+            <div class="stat-card rounded-2xl p-4 md:p-5">
+                <p class="text-gray-400 text-xs md:text-sm mb-1" data-i18n="invoices">Invoices</p>
+                <p class="text-xl md:text-2xl font-bold text-blue-400"><span id="stat-count">0</span></p>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="switchTab('invoices')" id="tab-invoices"
+                class="tab-btn active px-6 py-3 rounded-xl font-semibold transition bg-white text-gray-800 shadow-lg">
+                📋 <span data-i18n="invoices_tab">Invoices</span>
+            </button>
+            <button onclick="switchTab('vendors')" id="tab-vendors"
+                class="tab-btn px-6 py-3 rounded-xl font-semibold transition bg-white/20 text-white hover:bg-white/30">
+                🏢 <span data-i18n="vendors_tab">Vendors</span>
+            </button>
+        </div>
+
+        <!-- Invoices Panel -->
+        <div id="panel-invoices">
+            <!-- Search & Filters -->
+            <div class="glass rounded-2xl p-4 mb-4">
+                <div class="flex flex-col md:flex-row gap-3">
+                    <!-- Search -->
+                    <div class="flex-1">
+                        <input type="text" id="search-input" placeholder="🔍 Search GSTIN, Invoice No..."
+                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition"
+                            onkeyup="filterInvoices()">
+                    </div>
+
+                    <!-- Status Filter -->
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="setStatusFilter('ALL')"
+                            class="filter-btn active px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600"
+                            data-filter="ALL">
+                            <span data-i18n="all">All</span>
+                        </button>
+                        <button onclick="setStatusFilter('FILED')"
+                            class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600"
+                            data-filter="FILED">
+                            ✔️ <span data-i18n="filed">Filed</span>
+                        </button>
+                        <button onclick="setStatusFilter('NOT_FOUND')"
+                            class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600"
+                            data-filter="NOT_FOUND">
+                            ⚠️ <span data-i18n="not_found">Not Found</span>
+                        </button>
+                        <button onclick="setStatusFilter('MISMATCH')"
+                            class="filter-btn px-4 py-2 rounded-lg text-sm font-medium bg-gray-100 text-gray-600"
+                            data-filter="MISMATCH">
+                            ❌ <span data-i18n="mismatch">Mismatch</span>
+                        </button>
+                    </div>
+
+                    <!-- Export Button -->
+                    <button onclick="exportCSV()"
+                        class="px-4 py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white font-medium transition flex items-center gap-2">
+                        📥 <span data-i18n="export">Export CSV</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Invoices Table -->
+            <div class="glass rounded-2xl overflow-hidden shadow-xl">
+                <div class="p-4 md:p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800" data-i18n="recent_invoices">Recent Invoices
+                    </h2>
+                    <span class="text-sm text-gray-500" id="invoice-count">0 invoices</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-gray-50 text-gray-500 text-xs md:text-sm uppercase tracking-wider">
+                            <tr>
+                                <th class="p-3 md:p-4 font-medium" data-i18n="date">Date</th>
+                                <th class="p-3 md:p-4 font-medium" data-i18n="vendor_gstin">Vendor GSTIN</th>
+                                <th class="p-3 md:p-4 font-medium" data-i18n="invoice_no">Invoice No</th>
+                                <th class="p-3 md:p-4 font-medium" data-i18n="amount">Amount</th>
+                                <th class="p-3 md:p-4 font-medium" data-i18n="status_header">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoice-list" class="divide-y divide-gray-100 text-gray-700 text-sm">
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-gray-400" data-i18n="loading">Loading...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vendors Panel (Hidden by default) -->
+        <div id="panel-vendors" class="hidden">
+            <div class="glass rounded-2xl overflow-hidden shadow-xl">
+                <div class="p-4 md:p-6 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg md:text-xl font-bold text-gray-800" data-i18n="vendors_title">Your Vendors</h2>
+                    <span class="text-sm text-gray-500" id="vendor-count">0 vendors</span>
+                </div>
+                <div id="vendor-list" class="p-4 space-y-4">
+                    <div class="text-center text-gray-400 py-8" data-i18n="loading">Loading...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-500 text-sm mt-6 pb-20 md:pb-8" data-i18n="footer_tip">
+            Forward your vendor invoices to WhatsApp to add them here
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav justify-around">
+        <a href="#" onclick="scrollToTop()" class="flex flex-col items-center text-white/60 hover:text-white py-2 px-4">
+            <span class="text-xl">🏠</span>
+            <span class="text-xs mt-1" data-i18n="home">Home</span>
+        </a>
+        <a href="#" onclick="focusSearch()" class="flex flex-col items-center text-white/60 hover:text-white py-2 px-4">
+            <span class="text-xl">🔍</span>
+            <span class="text-xs mt-1" data-i18n="search">Search</span>
+        </a>
+        <a href="#" onclick="showQR()" class="flex flex-col items-center text-white/60 hover:text-white py-2 px-4">
+            <span class="text-xl">📱</span>
+            <span class="text-xs mt-1" data-i18n="qr">QR Code</span>
+        </a>
+        <a href="#" onclick="toggleLanguage()"
+            class="flex flex-col items-center text-white/60 hover:text-white py-2 px-4">
+            <span class="text-xl">🌐</span>
+            <span class="text-xs mt-1" id="mobile-lang">हिंदी</span>
+        </a>
+    </nav>
+
+    <script>
+        // State
+        let authToken = localStorage.getItem('gst_guard_token');
+        let currentPhone = '';
+        let allInvoices = [];
+        let currentStatusFilter = 'ALL';
+        let currentLang = localStorage.getItem('gst_guard_lang') || 'en';
+
+        // Translations
+        const translations = {
+            hi: {
+                login_subtitle: 'आपका ITC Recovery Assistant',
+                phone_label: 'WhatsApp फ़ोन नंबर',
+                send_otp: 'OTP भेजें',
+                otp_help: 'आपको WhatsApp पर login code मिलेगा',
+                enter_otp: '6-digit code डालें जो भेजा गया',
+                verify_login: 'Verify करें और Login',
+                change_number: 'नंबर बदलें',
+                welcome: 'वापस स्वागत है!',
+                status: 'स्थिति',
+                logout: 'Logout',
+                total_processed: 'कुल Process हुआ',
+                itc_recovered: 'ITC मिला',
+                at_risk: 'खतरे में',
+                invoices: 'Invoices',
+                all: 'सभी',
+                filed: 'दाखिल',
+                not_found: 'नहीं मिला',
+                mismatch: 'Mismatch',
+                export: 'CSV डाउनलोड',
+                recent_invoices: 'हाल के Invoices',
+                date: 'तारीख',
+                vendor_gstin: 'Vendor GSTIN',
+                invoice_no: 'Invoice नं.',
+                amount: 'राशि',
+                status_header: 'स्थिति',
+                loading: 'लोड हो रहा है...',
+                no_invoices: 'अभी कोई invoice नहीं है। GST Guard WhatsApp पर invoice photo forward करें!',
+                footer_tip: 'अपने vendor invoices WhatsApp पर forward करें',
+                home: 'होम',
+                search: 'खोजें',
+                qr: 'QR Code'
+            },
+            en: {
+                login_subtitle: 'Your ITC Recovery Assistant',
+                phone_label: 'WhatsApp Phone Number',
+                send_otp: 'Send OTP',
+                otp_help: "You'll receive a login code on WhatsApp",
+                enter_otp: 'Enter the 6-digit code sent to',
+                verify_login: 'Verify & Login',
+                change_number: 'Change Number',
+                welcome: 'Welcome back!',
+                status: 'Status',
+                logout: 'Logout',
+                total_processed: 'Total Processed',
+                itc_recovered: 'ITC Recovered',
+                at_risk: 'At Risk',
+                invoices: 'Invoices',
+                all: 'All',
+                filed: 'Filed',
+                not_found: 'Not Found',
+                mismatch: 'Mismatch',
+                export: 'Export CSV',
+                recent_invoices: 'Recent Invoices',
+                date: 'Date',
+                vendor_gstin: 'Vendor GSTIN',
+                invoice_no: 'Invoice No',
+                amount: 'Amount',
+                status_header: 'Status',
+                loading: 'Loading...',
+                no_invoices: 'No invoices yet. Forward an invoice photo to your GST Guard WhatsApp number to start!',
+                footer_tip: 'Forward your vendor invoices to WhatsApp to add them here',
+                home: 'Home',
+                search: 'Search',
+                qr: 'QR Code'
+            }
+        };
+
+        // Initialize
+        applyLanguage();
+        if (authToken) {
+            validateAndShowDashboard();
+        }
+
+        function applyLanguage() {
+            const t = translations[currentLang];
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (t[key]) el.textContent = t[key];
+            });
+            // Update toggle buttons
+            document.getElementById('lang-toggle').textContent = currentLang === 'en' ? 'हिंदी' : 'English';
+            document.getElementById('mobile-lang').textContent = currentLang === 'en' ? 'हिंदी' : 'English';
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'hi' : 'en';
+            localStorage.setItem('gst_guard_lang', currentLang);
+            applyLanguage();
+            // Re-render invoices with new language
+            if (allInvoices.length > 0) {
+                renderInvoices(filterInvoiceData());
+            }
+        }
+
+        async function validateAndShowDashboard() {
+            try {
+                const res = await fetch('/api/auth/me', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (res.ok) {
+                    const user = await res.json();
+                    showDashboard(user);
+                } else {
+                    localStorage.removeItem('gst_guard_token');
+                    authToken = null;
+                }
+            } catch (e) {
+                console.error('Auth check failed:', e);
+            }
+        }
+
+        async function requestOTP() {
+            const phone = document.getElementById('phone-input').value.trim();
+            if (phone.length !== 10) {
+                showError('Please enter a valid 10-digit phone number');
+                return;
+            }
+
+            currentPhone = '91' + phone;
+            const btn = document.getElementById('request-otp-btn');
+            btn.innerHTML = '<span class="animate-pulse">Sending...</span>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/request-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    document.getElementById('display-phone').textContent = `+91 ${phone}`;
+                    document.getElementById('step-phone').classList.add('hidden');
+                    document.getElementById('step-otp').classList.remove('hidden');
+                    hideError();
+
+                    if (data.dev_otp) {
+                        document.getElementById('otp-input').value = data.dev_otp;
+                        console.log('DEV MODE: OTP auto-filled');
+                    }
+                } else {
+                    showError(data.detail || 'Failed to send OTP');
+                }
+            } catch (e) {
+                showError('Network error. Please try again.');
+            }
+
+            btn.innerHTML = `<span data-i18n="send_otp">${translations[currentLang].send_otp}</span> →`;
+            btn.disabled = false;
+        }
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otp-input').value.trim();
+            if (otp.length !== 6) {
+                showError('Please enter the 6-digit OTP');
+                return;
+            }
+
+            const btn = document.getElementById('verify-otp-btn');
+            btn.innerHTML = '<span class="animate-pulse">Verifying...</span>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone: currentPhone, otp: otp })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    authToken = data.token;
+                    localStorage.setItem('gst_guard_token', authToken);
+                    showDashboard(data.user);
+                } else {
+                    showError(data.detail || 'Invalid OTP');
+                }
+            } catch (e) {
+                showError('Network error. Please try again.');
+            }
+
+            btn.innerHTML = `<span data-i18n="verify_login">${translations[currentLang].verify_login}</span>`;
+            btn.disabled = false;
+        }
+
+        function backToPhone() {
+            document.getElementById('step-otp').classList.add('hidden');
+            document.getElementById('step-phone').classList.remove('hidden');
+            document.getElementById('otp-input').value = '';
+            hideError();
+        }
+
+        function showDashboard(user) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            document.getElementById('user-greeting').textContent =
+                user.business_name ? `Welcome, ${user.business_name}!` : translations[currentLang].welcome;
+
+            fetchDashboardData();
+            setInterval(fetchDashboardData, 30000);
+        }
+
+        async function fetchDashboardData() {
+            if (!authToken) return;
+
+            try {
+                const summaryRes = await fetch('/api/invoices/summary', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (summaryRes.ok) {
+                    const summary = await summaryRes.json();
+                    document.getElementById('stat-total').textContent = formatCurrency(summary.total_amount);
+                    document.getElementById('stat-recovered').textContent = formatCurrency(summary.itc_recovered);
+                    document.getElementById('stat-risk').textContent = formatCurrency(summary.itc_at_risk);
+                    document.getElementById('stat-count').textContent = summary.total_invoices;
+                }
+
+                const invRes = await fetch('/api/invoices?limit=100', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (invRes.ok) {
+                    const data = await invRes.json();
+                    allInvoices = data.invoices || [];
+                    renderInvoices(filterInvoiceData());
+                }
+            } catch (e) {
+                console.error('Dashboard fetch error:', e);
+            }
+        }
+
+        function filterInvoiceData() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+
+            return allInvoices.filter(inv => {
+                // Status filter
+                if (currentStatusFilter !== 'ALL' && inv.reconciliation_status !== currentStatusFilter) {
+                    return false;
+                }
+
+                // Search filter
+                if (searchTerm) {
+                    const gstin = (inv.vendor_gstin || '').toLowerCase();
+                    const invNo = (inv.invoice_number || '').toLowerCase();
+                    if (!gstin.includes(searchTerm) && !invNo.includes(searchTerm)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            });
+        }
+
+        function filterInvoices() {
+            renderInvoices(filterInvoiceData());
+        }
+
+        function setStatusFilter(status) {
+            currentStatusFilter = status;
+
+            // Update button states
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-filter') === status) {
+                    btn.classList.add('active');
+                }
+            });
+
+            filterInvoices();
+        }
+
+        function renderInvoices(invoices) {
+            const tbody = document.getElementById('invoice-list');
+            const countEl = document.getElementById('invoice-count');
+
+            countEl.textContent = `${invoices.length} invoice${invoices.length !== 1 ? 's' : ''}`;
+
+            if (!invoices || invoices.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="p-8 text-center text-gray-400">
+                            ${translations[currentLang].no_invoices}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = invoices.map(inv => {
+                const amount = parseFloat(inv.amount) || 0;
+                const status = inv.reconciliation_status || 'PENDING';
+
+                let statusClass = 'bg-gray-100 text-gray-600';
+                let statusLabel = status;
+                if (status === 'FILED') {
+                    statusClass = 'bg-green-100 text-green-700';
+                    statusLabel = currentLang === 'hi' ? 'दाखिल ✅' : 'FILED ✅';
+                }
+                if (status === 'NOT_FOUND') {
+                    statusClass = 'bg-red-100 text-red-700';
+                    statusLabel = currentLang === 'hi' ? 'नहीं मिला ⚠️' : 'NOT FOUND ⚠️';
+                }
+                if (status === 'MISMATCH') {
+                    statusClass = 'bg-yellow-100 text-yellow-700';
+                    statusLabel = currentLang === 'hi' ? 'Mismatch ❌' : 'MISMATCH ❌';
+                }
+
+                return `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 md:p-4 whitespace-nowrap">${inv.date || '-'}</td>
+                        <td class="p-3 md:p-4 font-mono text-xs md:text-sm">${inv.vendor_gstin || 'Unknown'}</td>
+                        <td class="p-3 md:p-4 text-gray-500">#${inv.invoice_number || '-'}</td>
+                        <td class="p-3 md:p-4 font-bold whitespace-nowrap">₹${amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-3 md:p-4">
+                            <span class="px-2 md:px-3 py-1 rounded-full text-xs font-bold ${statusClass}">
+                                ${statusLabel}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportCSV() {
+            const invoices = filterInvoiceData();
+            if (invoices.length === 0) {
+                alert(currentLang === 'hi' ? 'Export करने के लिए कोई invoice नहीं है' : 'No invoices to export');
+                return;
+            }
+
+            // CSV Header
+            let csv = 'Date,Vendor GSTIN,Invoice Number,Amount,Status\n';
+
+            // CSV Rows
+            invoices.forEach(inv => {
+                const row = [
+                    inv.date || '',
+                    inv.vendor_gstin || '',
+                    inv.invoice_number || '',
+                    inv.amount || 0,
+                    inv.reconciliation_status || 'PENDING'
+                ].map(val => `"${val}"`).join(',');
+                csv += row + '\n';
+            });
+
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `gst_guard_invoices_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        function formatCurrency(num) {
+            return parseFloat(num || 0).toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('gst_guard_token');
+            authToken = null;
+            location.reload();
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('error-msg');
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-msg').classList.add('hidden');
+        }
+
+        // Mobile nav helpers
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function focusSearch() {
+            document.getElementById('search-input').focus();
+            document.getElementById('search-input').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showQR() {
+            window.open('/api/qr', '_blank');
+        }
+
+        // Tab switching
+        let currentTab = 'invoices';
+        let allVendors = [];
+
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update tab button styles
+            document.getElementById('tab-invoices').className = tab === 'invoices'
+                ? 'tab-btn active px-6 py-3 rounded-xl font-semibold transition bg-white text-gray-800 shadow-lg'
+                : 'tab-btn px-6 py-3 rounded-xl font-semibold transition bg-white/20 text-white hover:bg-white/30';
+            document.getElementById('tab-vendors').className = tab === 'vendors'
+                ? 'tab-btn active px-6 py-3 rounded-xl font-semibold transition bg-white text-gray-800 shadow-lg'
+                : 'tab-btn px-6 py-3 rounded-xl font-semibold transition bg-white/20 text-white hover:bg-white/30';
+
+            // Show/hide panels
+            document.getElementById('panel-invoices').classList.toggle('hidden', tab !== 'invoices');
+            document.getElementById('panel-vendors').classList.toggle('hidden', tab !== 'vendors');
+
+            // Fetch vendors if switching to vendors tab
+            if (tab === 'vendors' && allVendors.length === 0) {
+                fetchVendors();
+            }
+        }
+
+        async function fetchVendors() {
+            if (!authToken) return;
+
+            try {
+                const res = await fetch('/api/vendors', {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    allVendors = data.vendors || [];
+                    renderVendors(allVendors);
+                }
+            } catch (e) {
+                console.error('Vendor fetch error:', e);
+            }
+        }
+
+        function renderVendors(vendors) {
+            const container = document.getElementById('vendor-list');
+            const countEl = document.getElementById('vendor-count');
+
+            countEl.textContent = `${vendors.length} vendor${vendors.length !== 1 ? 's' : ''}`;
+
+            if (!vendors || vendors.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-400 py-8">
+                        ${currentLang === 'hi' ? 'कोई vendor नहीं मिला' : 'No vendors found'}
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = vendors.map(v => {
+                const total = parseFloat(v.total_amount || 0);
+                const hasIssues = v.not_found_count > 0 || v.mismatch_count > 0;
+
+                let statusBadge = '';
+                if (v.not_found_count > 0) {
+                    statusBadge += `<span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">⚠️ ${v.not_found_count} not filed</span> `;
+                }
+                if (v.mismatch_count > 0) {
+                    statusBadge += `<span class="px-2 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">❌ ${v.mismatch_count} mismatch</span> `;
+                }
+                if (v.filed_count > 0 && !hasIssues) {
+                    statusBadge = `<span class="px-2 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">✔️ All filed</span>`;
+                }
+
+                return `
+                    <div class="bg-gray-50 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-gray-100 transition">
+                        <div class="flex-1">
+                            <div class="font-mono text-sm text-gray-800 font-semibold">${v.gstin}</div>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                ${statusBadge}
+                            </div>
+                            <div class="text-sm text-gray-500 mt-2">
+                                ${v.invoices?.length || 0} invoices • ₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                            </div>
+                        </div>
+                        ${hasIssues ? `
+                            <button onclick="promptReminder('${v.gstin}')" 
+                                class="px-4 py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-medium transition text-sm whitespace-nowrap">
+                                📤 ${currentLang === 'hi' ? 'Reminder भेजें' : 'Send Reminder'}
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function promptReminder(gstin) {
+            const phone = prompt(
+                currentLang === 'hi'
+                    ? `Vendor का WhatsApp number डालें (with country code):\nGSTIN: ${gstin}`
+                    : `Enter vendor WhatsApp number (with country code):\nGSTIN: ${gstin}`,
+                '91'
+            );
+
+            if (phone && phone.length >= 10) {
+                sendReminder(gstin, phone);
+            }
+        }
+
+        async function sendReminder(gstin, phone) {
+            try {
+                const res = await fetch('/api/reminders/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ vendor_gstin: gstin, vendor_phone: phone })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.success) {
+                    alert(currentLang === 'hi' ? '✅ Reminder भेज दिया!' : '✅ Reminder sent!');
+                } else {
+                    alert(data.message || 'Failed to send reminder');
+                }
+            } catch (e) {
+                alert('Network error');
+            }
+        }
+
+        // Enter key handlers
+        document.getElementById('phone-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') requestOTP();
+        });
+        document.getElementById('otp-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyOTP();
+        });
+    </script>
+</body>
+
+</html>
